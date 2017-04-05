@@ -2,19 +2,40 @@ export class ColorWheel {
     options: any = { radius: 80, centerRadius: 0 };
 
     private drawWheel(canvas: HTMLCanvasElement) {
-       // canvas.style.minHeight = ((this.options.radius * 2) + 200) + '';
-       // canvas.style.minWidth = ((this.options.radius * 2) + 100) + '';
+        // canvas.style.minHeight = ((this.options.radius * 2) + 200) + '';
+        // canvas.style.minWidth = ((this.options.radius * 2) + 100) + '';
         var ctx = canvas.getContext('2d');
-        canvas.addEventListener('click', (e)=>{
-            console.log(e);
+        canvas.addEventListener('click', (e) => {
+            var pos = this.findPos(canvas);
+            var x = e.pageX - pos.x;
+            var y = e.pageY - pos.y;
+            var p = ctx.getImageData(e.pageY, y, 1, 1).data;
+            console.log(p);
         })
         for (var i = 0; i < 360; i++) {
             var color = `hsl(${i}, 100%, 50%)`;
             var rgbaColor = this.hslToRgba(color, 0.1);
-            this.drawQuadrant(ctx, this.options.radius-50, this.options.radius-50, this.options.radius, i, i + 5, rgbaColor);
+            this.drawQuadrant(ctx, this.options.radius - 50, this.options.radius - 50, this.options.radius, i, i + 5, rgbaColor);
         }
     }
 
+    private findPos(obj) {
+        var curleft = 0, curtop = 0; 
+        if (obj.offsetParent) {
+            do {
+                curleft += obj.offsetLeft;
+                curtop += obj.offsetTop;
+            } while (obj = obj.offsetParent);
+            return { x: curleft, y: curtop };
+        }
+        return undefined;
+    }
+
+    private rgbToHex(r, g, b) {
+        if (r > 255 || g > 255 || b > 255)
+            throw "Invalid color component";
+        return ((r << 16) | (g << 8) | b).toString(16);
+    }
     private drawQuadrant(context, x, y, radius, startAngle, sweepAngle, fillColor, counterClockwise = false, lineColor?, lineWidth?) {
         context.beginPath();
         context.fillStyle = fillColor;
@@ -46,7 +67,7 @@ export class ColorWheel {
         if (!element) return;
         console.log('HERE')
         var canvas = document.createElement('canvas');
-        canvas.style.position='relative';
+        canvas.style.position = 'relative';
         element.appendChild(canvas);
         this.drawWheel(canvas);
     }
